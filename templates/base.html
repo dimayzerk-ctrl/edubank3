@@ -7,10 +7,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+
 <nav class="navbar">
     <div class="logo">EduBank</div>
+
     <div class="nav-links">
         <a href="/">Главная</a>
+
         {% if current_user.is_authenticated %}
             <a href="/dashboard">Кабинет</a>
             <a href="/transfer">Перевод</a>
@@ -24,15 +27,8 @@
 </nav>
 
 <div class="main-container">
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
     {% block content %}{% endblock %}
 </div>
+
 </body>
 </html>
