@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="history-card">
+    <h2>История транзакций</h2>
+    <table>
+        <tr>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Описание</th>
+        </tr>
+        {% for tx in transactions %}
+        <tr>
+            <td>{{ tx.timestamp }}</td>
+            <td>${{ tx.amount }}</

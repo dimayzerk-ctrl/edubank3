@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-card">
+    <h2>Перевод</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.recipient(class='input-field', placeholder='Recipient Username') }}
+        {{ form.amount(class='input-field', placeholder='Amount') }}
+        {{ form.description(class='input-field', placeholder='Description') }}
+        {{ form.submit(class='btn primary full') }}
+    </form>
+</div>
+{% endblock %}
