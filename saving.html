@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-card">
+    <h2>Накопления</h2>
+    <div class="balance-box">₽{{ savings.balance }}</div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.amount(class="input-field") }}
+        {{ form.action(class="input-field") }}
+        {{ form.submit(class="btn primary full") }}
+    </form>
+</div>
+{% endblock %}
