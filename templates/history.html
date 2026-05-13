@@ -1,14 +1,22 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
 <div class="history-card">
-    <h2>История транзакций</h2>
+    <h2>История операций</h2>
+
     <table>
         <tr>
             <th>Дата</th>
-            <th>Сумма</th>
             <th>Описание</th>
+            <th>Сумма</th>
         </tr>
+
         {% for tx in transactions %}
         <tr>
-            <td>{{ tx.timestamp }}</td>
-            <td>${{ tx.amount }}</
+            <td>{{ tx.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td>{{ tx.description }}</td>
+            <td>₽{{ tx.amount }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
