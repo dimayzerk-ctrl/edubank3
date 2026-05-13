@@ -19,3 +19,20 @@ class TransferForm(FlaskForm):
     amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01)])
     description = StringField('Description')
     submit = SubmitField('Send')
+
+class SavingsForm(FlaskForm):
+    amount = DecimalField('Сумма', validators=[DataRequired()])
+    action = SelectField('Действие', choices=[('deposit', 'Пополнить'), ('withdraw', 'Вывести')])
+    submit = SubmitField('Подтвердить')
+
+
+class PaymentForm(FlaskForm):
+    category = SelectField('Категория', choices=[
+        ('Мобильная связь', 'Мобильная связь'),
+        ('Интернет', 'Интернет'),
+        ('ЖКХ', 'ЖКХ'),
+        ('Игры', 'Игры'),
+        ('Подписки', 'Подписки')
+    ])
+    amount = DecimalField('Сумма', validators=[DataRequired()])
+    submit = SubmitField('Оплатить')
