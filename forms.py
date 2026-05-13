@@ -6,34 +6,27 @@ from wtforms import (
     DecimalField,
     SelectField
 )
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 
 
 class RegisterForm(FlaskForm):
     username = StringField(
-        'Username',
+        'Имя пользователя',
         validators=[DataRequired(), Length(min=3, max=20)]
     )
-
     email = StringField(
         'Email',
         validators=[DataRequired(), Email()]
     )
-
     password = PasswordField(
-        'Password',
+        'Пароль',
         validators=[DataRequired(), Length(min=6)]
     )
-
     confirm_password = PasswordField(
-        'Confirm Password',
-        validators=[
-            DataRequired(),
-            EqualTo('password')
-        ]
+        'Подтвердите пароль',
+        validators=[DataRequired(), EqualTo('password')]
     )
-
-    submit = SubmitField('Register')
+    submit = SubmitField('Зарегистрироваться')
 
 
 class LoginForm(FlaskForm):
@@ -41,47 +34,44 @@ class LoginForm(FlaskForm):
         'Email',
         validators=[DataRequired(), Email()]
     )
-
     password = PasswordField(
-        'Password',
+        'Пароль',
         validators=[DataRequired()]
     )
-
-    submit = SubmitField('Login')
+    submit = SubmitField('Войти')
 
 
 class TransferForm(FlaskForm):
     recipient = StringField(
-        'Recipient Username',
+        'Имя получателя',
         validators=[DataRequired()]
     )
-
     amount = DecimalField(
-        'Amount',
-        validators=[DataRequired()]
+        'Сумма',
+        places=2,
+        validators=[DataRequired(), NumberRange(min=0.01, message='Сумма должна быть больше 0')]
     )
-
     description = StringField(
-        'Description'
+        'Описание',
+        validators=[Length(max=200)]
     )
-
-    submit = SubmitField('Transfer')
+    submit = SubmitField('Перевести')
 
 
 class SavingsForm(FlaskForm):
     amount = DecimalField(
         'Сумма',
-        validators=[DataRequired()]
+        places=2,
+        validators=[DataRequired(), NumberRange(min=0.01, message='Сумма должна быть больше 0')]
     )
-
     action = SelectField(
         'Действие',
         choices=[
             ('deposit', 'Пополнить'),
             ('withdraw', 'Вывести')
-        ]
+        ],
+        validators=[DataRequired()]
     )
-
     submit = SubmitField('Подтвердить')
 
 
@@ -94,12 +84,12 @@ class PaymentForm(FlaskForm):
             ('ЖКХ', 'ЖКХ'),
             ('Игры', 'Игры'),
             ('Подписки', 'Подписки')
-        ]
-    )
-
-    amount = DecimalField(
-        'Сумма',
+        ],
         validators=[DataRequired()]
     )
-
+    amount = DecimalField(
+        'Сумма',
+        places=2,
+        validators=[DataRequired(), NumberRange(min=0.01, message='Сумма должна быть больше 0')]
+    )
     submit = SubmitField('Оплатить')
