@@ -1,118 +1,68 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from config import Config
-from models import db, User, Transaction
-from forms import RegisterForm, LoginForm, TransferForm
+from models import db, User, Transaction, SavingsAccount
+from forms import RegisterForm, LoginForm, TransferForm, SavingsForm, PaymentForm
 
-app = Flask(__name__)
-app.config.from_object(Config)
-
-db.init_app(app)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegisterForm()
+@app.route('/savings', methods=['GET', 'POST'])
+@login_required
+def savings():
+    form = SavingsForm()
+    savings = SavingsAccount.query.filter_by(user_id=current_user.id).first()
 
     if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash('Email already exists')
-            return redirect(url_for('register'))
+        amount = float(form.amount.data)
 
-        if User.query.filter_by(username=form.username.data).first():
-            flash('Username already exists')
-            return redirect(url_for('register'))
+        if form.action.data == 'deposit':
+            if current_user.balance >= amount:
+                current_user.balance -= amount
+                savings.balance += amount
+                flash('Средства переведены в накопления')
+            else:
+                flash('Недостаточно средств')
 
-        user = User(
-            username=form.username.data,
-            email=form.email.data
-        )
+        elif form.action.data == 'withdraw':
+            if savings.balance >= amount:
+                savings.balance -= amount
+                current_user.balance += amount
+                flash('Средства выведены с накоплений')
+            else:
+                flash('Недостаточно накоплений')
 
-        user.set_password(form.password.data)
-
-        db.session.add(user)
         db.session.commit()
+        return redirect(url_for('savings'))
 
-        flash('Registration successful')
-        return redirect(url_for('login'))
-
-    return render_template('register.html', form=form)
+    return render_template('savings.html', form=form, savings=savings)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
+@app.route('/payments', methods=['GET', 'POST'])
+@login_required
+def payments():
+    form = PaymentForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-
-        if user and user.check_password(form.password.data):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-
-        flash('Invalid email or password')
-
-    return render_template('login.html', form=form)
-
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html')
-
-
-@app.route('/transfer', methods=['GET', 'POST'])
-@login_required
-def transfer():
-    form = TransferForm()
-
-    if form.validate_on_submit():
-        recipient = User.query.filter_by(username=form.recipient.data).first()
-        amount = form.amount.data
-
-        if not recipient:
-            flash('Recipient not found')
-            return redirect(url_for('transfer'))
-
-        if recipient.id == current_user.id:
-            flash('You cannot transfer to yourself')
-            return redirect(url_for('transfer'))
+        amount = float(form.amount.data)
 
         if current_user.balance < amount:
-            flash('Insufficient funds')
-            return redirect(url_for('transfer'))
+            flash('Недостаточно средств')
+            return redirect(url_for('payments'))
 
         current_user.balance -= amount
-        recipient.balance += amount
 
         transaction = Transaction(
             sender_id=current_user.id,
-            receiver_id=recipient.id,
+            receiver_id=current_user.id,
             amount=amount,
-            description=form.description.data or 'Transfer'
+            description=f'Оплата: {form.category.data}'
         )
 
         db.session.add(transaction)
         db.session.commit()
 
-        flash('Transfer successful')
-        return redirect(url_for('dashboard'))
+        flash('Платёж выполнен')
+        return redirect(url_for('payments'))
 
-    return render_template('transfer.html', form=form)
+    return render_template('payments.html', form=form)
 
 
 @app.route('/history')
